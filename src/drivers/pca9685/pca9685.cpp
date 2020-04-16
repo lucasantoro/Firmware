@@ -179,7 +179,7 @@ private:
 
 PCA9685::PCA9685(I2CSPIBusOption bus_option, int bus, int bus_frequency) :
 	I2C(DRV_PWM_DEVTYPE_PCA9685, MODULE_NAME, bus, ADDR, bus_frequency),
-	I2CSPIDriver(MODULE_NAME, px4::device_bus_to_wq(get_device_id()), bus_option, bus),
+	I2CSPIDriver(MODULE_NAME, px4::device_bus_to_wq(get_device_id()), bus_option, bus, ADDR),
 	_mode(IOX_MODE_ON),
 	_i2cpwm_interval(1_s / 60.0f),
 	_comms_errors(perf_alloc(PC_COUNT, MODULE_NAME": com_err")),

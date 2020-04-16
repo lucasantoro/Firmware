@@ -157,6 +157,8 @@ __EXPORT void board_on_reset(int status)
  *
  ************************************************************************************/
 
+#define _PIN_OFF(def) (((def) & (GPIO_PORT_MASK | GPIO_PIN_MASK)) | (GPIO_INPUT|GPIO_PULLDOWN|GPIO_SPEED_2MHz))
+
 __EXPORT void
 stm32_boardinitialize(void)
 {
@@ -170,7 +172,30 @@ stm32_boardinitialize(void)
 
 	const uint32_t gpio[] = PX4_GPIO_INIT_LIST;
 	px4_gpio_init(gpio, arraySize(gpio));
+
 	board_control_spi_sensors_power_configgpio();
+	board_control_spi_sensors_power(false, 0xffff);
+
+
+	// SPI1 all pins
+	px4_arch_configgpio(_PIN_OFF(GPIO_PORTF | GPIO_PIN2)); // ICM20689 CS
+	px4_arch_configgpio(_PIN_OFF(GPIO_PORTB | GPIO_PIN4)); // ICM20689 DRDY
+
+	px4_arch_configgpio(_PIN_OFF(GPIO_PORTF | GPIO_PIN3)); // ICM20602 CS
+	px4_arch_configgpio(_PIN_OFF(GPIO_PORTC | GPIO_PIN5)); // ICM20602 DRDY
+
+	px4_arch_configgpio(_PIN_OFF(GPIO_PORTF | GPIO_PIN4)); // BMI055 GYRO CS
+	px4_arch_configgpio(_PIN_OFF(GPIO_PORTB | GPIO_PIN14)); // BMI055 GYRO DRDY
+	px4_arch_configgpio(_PIN_OFF(GPIO_PORTG | GPIO_PIN10)); // BMI055 ACCEL CS
+	px4_arch_configgpio(_PIN_OFF(GPIO_PORTB | GPIO_PIN15)); // BMI055 ACCEL DRDY
+
+	px4_arch_configgpio(_PIN_OFF(GPIO_SPI1_MISO));
+	px4_arch_configgpio(_PIN_OFF(GPIO_SPI1_MOSI));
+	px4_arch_configgpio(_PIN_OFF(GPIO_SPI1_SCK));
+
+
+
+
 
 	/* configure USB interfaces */
 
@@ -206,6 +231,10 @@ stm32_boardinitialize(void)
 
 __EXPORT int board_app_initialize(uintptr_t arg)
 {
+	usleep(500 * 1000);
+
+	board_control_spi_sensors_power_configgpio();
+
 	/* Power on Interfaces */
 	VDD_3V3_SD_CARD_EN(true);
 	VDD_5V_PERIPH_EN(true);
